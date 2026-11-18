@@ -5,6 +5,7 @@ class Mp4Muxer{
   _flush(){if(this.pend.length){this.parts.push(new Blob(this.pend));this.pend=[];this.pendN=0}}
   addVideo(c,m){if(m&&m.decoderConfig&&m.decoderConfig.description)this.avcC=new Uint8Array(m.decoderConfig.description.buffer||m.decoderConfig.description).slice();const s=this._store(c),i=this.v.length;s.key=c.type==='key';s.ct=Math.round(c.timestamp*this.vScale/1e6)-i*this.vDur;this.v.push(s)}
   addAudio(c,m){if(m&&m.decoderConfig&&m.decoderConfig.description)this.asc=new Uint8Array(m.decoderConfig.description.buffer||m.decoderConfig.description).slice();const s=this._store(c);s.d=Math.max(1,Math.round((c.duration||0)*this.o.audio.sampleRate/1e6));this.a.push(s)}
+  addAudioRaw(data,d){const s=this._store({byteLength:data.length,copyTo(o){o.set(data)}});s.d=d;this.a.push(s)}
   finalize(){this._flush();const ftyp=B('ftyp',S4('isom'),U32(512),S4('isom'),S4('iso2'),S4('avc1'),S4('mp41'));
     const hdr=this.pos+16;const mk=b=>this._moov(b);const len=mk(0).length;const moov=mk(ftyp.length+len+16);
     const mh=cat(U32(1),S4('mdat'),U32(Math.floor((hdr)/4294967296)),U32(hdr>>>0));return new Blob([ftyp,moov,mh,...this.parts],{type:'video/mp4'})}
