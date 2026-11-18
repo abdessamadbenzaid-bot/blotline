@@ -59,9 +59,9 @@ jobs:
           APK=android/app/build/outputs/apk/release/app-release.apk
           AAB=android/app/build/outputs/bundle/release/app-release.aab
           "$BT/aapt2" dump badging "$APK" > /tmp/badging.txt
-          grep -E "^package:|^sdkVersion|^targetSdkVersion|^uses-permission" /tmp/badging.txt
+          grep -E "^package:|^minSdkVersion|^sdkVersion|^targetSdkVersion|^uses-permission" /tmp/badging.txt
           grep -q "^targetSdkVersion:'36'" /tmp/badging.txt
-          grep -q "^sdkVersion:'29'" /tmp/badging.txt
+          grep -Eq "^(minSdkVersion|sdkVersion):'29'" /tmp/badging.txt
           if grep -E "android.permission.(INTERNET|ACCESS_NETWORK_STATE|READ_MEDIA_VIDEO|READ_EXTERNAL_STORAGE)" /tmp/badging.txt; then exit 1; fi
           "$BT/apksigner" verify "$APK"
           unzip -l "$APK" | grep -q "assets/index.html"
