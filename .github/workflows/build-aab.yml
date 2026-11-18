@@ -1,0 +1,31 @@
+name: Build signed AAB
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with: { gradle-version: "8.13" }
+      - name: Restore upload key
+        run: echo "${{ secrets.BLOTLINE_KEYSTORE_B64 }}" | base64 -d > "$RUNNER_TEMP/upload.jks"
+      - name: Build
+        working-directory: android
+        env:
+          BLOTLINE_KEYSTORE: ${{ runner.temp }}/upload.jks
+          BLOTLINE_KEYSTORE_PASSWORD: ${{ secrets.BLOTLINE_KEYSTORE_PASSWORD }}
+          BLOTLINE_KEY_ALIAS: ${{ secrets.BLOTLINE_KEY_ALIAS }}
+          BLOTLINE_KEY_PASSWORD: ${{ secrets.BLOTLINE_KEY_PASSWORD }}
+        run: gradle :app:bundleRelease --no-daemon
+      - name: Confirm the app has no INTERNET permission
+        run: |
+          unzip -o -q android/app/build/outputs/bundle/release/app-release.aab base/manifest/AndroidManifest.xml -d /tmp/aab
+          if grep -a -q "android.permission.INTERNET" /tmp/aab/base/manifest/AndroidManifest.xml; then exit 1; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: blotline-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
