@@ -11,6 +11,7 @@ import android.util.Base64
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var web: WebView
     private var fileCallback: ValueCallback<Array<Uri>>? = null
+    private var webDestroyed = false
 
     // System photo picker: the app never needs READ_MEDIA_VIDEO.
     private val picker = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
@@ -64,6 +66,15 @@ class MainActivity : ComponentActivity() {
 
                 // The app is one local page: every navigation elsewhere is refused.
                 override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest) = true
+
+                // If Android stops the page (for example when memory runs out), reopen the app instead of crashing.
+                override fun onRenderProcessGone(view: WebView, detail: RenderProcessGoneDetail): Boolean {
+                    (view.parent as? ViewGroup)?.removeView(view)
+                    view.destroy()
+                    webDestroyed = true
+                    recreate()
+                    return true
+                }
             }
             webChromeClient = object : WebChromeClient() {
                 override fun onShowFileChooser(
@@ -104,7 +115,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onDestroy() {
-        web.destroy()
+        if (!webDestroyed) web.destroy()
         super.onDestroy()
     }
 

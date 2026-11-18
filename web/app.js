@@ -48,21 +48,21 @@ function makeRenderer(){const fc=mk(),fx=fc.getContext('2d'),tiny=mk(),tx=tiny.g
 const previewR=makeRenderer(),exportR=makeRenderer();
 
 /* ---------- stage ---------- */
-let vr={x:0,y:0,w:1,h:1},cssW=1,cssH=1,DPR=1,needs=true;const dirty=()=>{needs=true};
+let TLH=76,vr={x:0,y:0,w:1,h:1},cssW=1,cssH=1,DPR=1,needs=true;const dirty=()=>{needs=true};
 function ratio(){return{orig:S.vw/S.vh,'9:16':9/16,'1:1':1,'4:5':.8,'16:9':16/9}[S.fmt]}
 function layout(){if(!S.url)return;const st=$('#stage'),aw=st.clientWidth,ah=st.clientHeight,r=ratio();let w=aw,h=aw/r;if(h>ah){h=ah;w=ah*r}cssW=Math.max(1,Math.floor(w));cssH=Math.max(1,Math.floor(h));DPR=Math.min(2,devicePixelRatio||1);
   const k=Math.min(1,960/Math.max(cssW*DPR,cssH*DPR));pv.width=Math.round(cssW*DPR*k);pv.height=Math.round(cssH*DPR*k);pv.style.width=cssW+'px';pv.style.height=cssH+'px';ov.width=cssW*DPR;ov.height=cssH*DPR;ov.style.width=cssW+'px';ov.style.height=cssH+'px';
-  const tw=tl.clientWidth;tl.width=tw*DPR;tl.height=76*DPR;dirty()}
+  TLH=tl.clientHeight||76;const tw=tl.clientWidth;tl.width=tw*DPR;tl.height=TLH*DPR;dirty()}
 function draw(){if(video.readyState<2)return;const k=cssW/pv.width,q=previewR(pctx,pv.width,pv.height,S.t,S.cmp);vr={x:q.x*k,y:q.y*k,w:q.w*k,h:q.h*k};drawOverlay();drawTL();$('#tc').innerHTML=`${fmtT(S.t-S.a)} <small>/ ${fmtT(S.b-S.a)}</small>`}
 function maskPx(m,t){const b=boxAt(m,t),g=b.g||1,w=b.w*g*vr.w,h=b.h*g*vr.h;return{x:vr.x+b.x*vr.w-(w-b.w*vr.w)/2,y:vr.y+b.y*vr.h-(h-b.h*vr.h)/2,w,h,c:b.c}}
 function drawOverlay(){octx.setTransform(DPR,0,0,DPR,0,0);octx.clearRect(0,0,cssW,cssH);if(S.cmp||S.busy==='export')return;
   for(const m of S.masks){if(!isOn(m,S.t))continue;const p=maskPx(m,S.t),on=m.id===S.sel,low=p.c<.6;octx.lineWidth=on?2.5:1.25;octx.strokeStyle=low?'#ff6a4d':on?'#ffe14a':'rgba(243,239,228,.6)';octx.setLineDash(on?[]:[5,4]);octx.beginPath();if(m.shape==='oval')octx.ellipse(p.x+p.w/2,p.y+p.h/2,p.w/2,p.h/2,0,0,7);else octx.rect(p.x,p.y,p.w,p.h);octx.stroke();octx.setLineDash([]);
     if(on){if(m.kf.length>1){octx.strokeStyle='rgba(255,225,74,.55)';octx.lineWidth=1.5;octx.beginPath();const st=Math.max(1,Math.floor(m.kf.length/90));m.kf.forEach((k,i)=>{if(i%st)return;const X=vr.x+(k.x+k.w/2)*vr.w,Y=vr.y+(k.y+k.h/2)*vr.h;i?octx.lineTo(X,Y):octx.moveTo(X,Y)});octx.stroke()}
       octx.fillStyle='#ffe14a';octx.strokeStyle='#0d0d0b';octx.lineWidth=2;octx.beginPath();octx.arc(p.x+p.w,p.y+p.h,9,0,7);octx.fill();octx.stroke()}}}
-function drawTL(){const W=tl.clientWidth,H=76,c=tctx;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,W,H);const X=t=>t/S.dur*W,th=44;
+function drawTL(){const W=tl.clientWidth,H=TLH,c=tctx;c.setTransform(DPR,0,0,DPR,0,0);c.clearRect(0,0,W,H);const X=t=>t/S.dur*W,th=Math.round(H*.58);
   if(thumbs)c.drawImage(thumbs,0,0,W,th);else{c.fillStyle='#211f1b';c.fillRect(0,0,W,th)}
   c.fillStyle='rgba(13,13,11,.76)';c.fillRect(0,0,X(S.a),th);c.fillRect(X(S.b),0,W-X(S.b),th);
-  c.strokeStyle='#ffe14a';c.lineWidth=3;c.strokeRect(X(S.a)+1.5,1.5,X(S.b)-X(S.a)-3,th-3);c.fillStyle='#ffe14a';c.fillRect(X(S.a),0,11,th);c.fillRect(X(S.b)-11,0,11,th);c.fillStyle='#16140a';c.fillRect(X(S.a)+4,15,3,14);c.fillRect(X(S.b)-7,15,3,14);
+  c.strokeStyle='#ffe14a';c.lineWidth=3;c.strokeRect(X(S.a)+1.5,1.5,X(S.b)-X(S.a)-3,th-3);c.fillStyle='#ffe14a';c.fillRect(X(S.a),0,11,th);c.fillRect(X(S.b)-11,0,11,th);c.fillStyle='#16140a';c.fillRect(X(S.a)+4,th/2-7,3,14);c.fillRect(X(S.b)-7,th/2-7,3,14);
   const list=S.masks.slice(-3);list.forEach((m,i)=>{const y=th+6+i*8;c.fillStyle='#322f29';c.fillRect(0,y,W,5);c.fillStyle=m.id===S.sel?'#ffe14a':'#a39d8e';c.fillRect(X(m.in),y,Math.max(2,X(m.out)-X(m.in)),5);c.fillStyle='#ff6a4d';for(const k of m.kf)if(k.c<.6)c.fillRect(X(k.t)-1,y,3,5)});
   c.fillStyle='#86dc9b';for(const b of S.bleeps)c.fillRect(X(b.t),th-6,Math.max(3,X(b.d)),6);
   c.fillStyle='#f3efe4';c.fillRect(X(S.t)-1,0,2,H);c.beginPath();c.arc(X(S.t),H-5,4.5,0,7);c.fill()}
@@ -95,7 +95,7 @@ ov.addEventListener('pointerup',endDrag);ov.addEventListener('pointercancel',end
 /* ---------- pointer: timeline ---------- */
 let td=null;
 function tlT(e){const r=tl.getBoundingClientRect();return clamp((e.clientX-r.left)/r.width,0,1)*S.dur}
-tl.addEventListener('pointerdown',e=>{if(S.busy)return;tl.setPointerCapture(e.pointerId);pause();const r=tl.getBoundingClientRect(),px=e.clientX-r.left,y=e.clientY-r.top,X=t=>t/S.dur*r.width,da=Math.abs(px-X(S.a)-5),db=Math.abs(px-X(S.b)+5);td=(y<48&&Math.min(da,db)<26)?(da<db?'a':'b'):'s';tlMove(e)});
+tl.addEventListener('pointerdown',e=>{if(S.busy)return;tl.setPointerCapture(e.pointerId);pause();const r=tl.getBoundingClientRect(),px=e.clientX-r.left,y=e.clientY-r.top,X=t=>t/S.dur*r.width,da=Math.abs(px-X(S.a)-5),db=Math.abs(px-X(S.b)+5);td=(y<TLH*.64&&Math.min(da,db)<26)?(da<db?'a':'b'):'s';tlMove(e)});
 function tlMove(e){if(!td)return;const t=tlT(e),gap=Math.min(.2,S.dur/2);if(td==='a'){S.a=clamp(t,0,S.b-gap);seek(S.a)}else if(td==='b'){S.b=clamp(t,S.a+gap,S.dur);seek(S.b)}else seek(clamp(t,S.a,S.b));dirty()}
 tl.addEventListener('pointermove',tlMove);tl.addEventListener('pointerup',()=>{td=null});tl.addEventListener('pointercancel',()=>{td=null});
 
@@ -218,7 +218,7 @@ async function runExport(){const[W,H]=outSize(S.q),br=Math.round(W*H*30*.13);pau
   S.busy='export';expCancel=false;openSheet(`<h2>${esc(T('rendering'))}</h2><div class="pct" id="xpct">0%</div><div class="prog"><i id="xbar"></i></div><p id="xlab">${esc(T('keepOpen'))}</p><div class="foot"><button data-act="stopExport">${esc(T('cancel'))}</button></div>`);
   let wl=null;try{wl=await navigator.wakeLock.request('screen')}catch(e){}try{window.BlotlineNative&&BlotlineNative.keepAwake(true)}catch(e){}
   try{let D=null;try{D=await demuxMp4(S.file)}catch(e){D=null}const plan={pass:false,A:null,acfg:null,notice:''};
-    if(S.audio==='keep'){if(D&&D.audio&&!S.bleeps.length)plan.pass=true;else if(D&&!D.hasAudio)plan.notice=T('noAudio');else if(S.dur>1200)plan.notice=T('tooLong');else{setProg(0,T('audioStep'));try{plan.A=await loadPCM();plan.acfg=typeof AudioEncoder!=='undefined'?await pickAudio(plan.A.sr,plan.A.ch):null;if(!plan.acfg){plan.A=null;plan.notice=T('noAudio')}}catch(e){plan.A=null;plan.notice=T('noAudio')}}}
+    if(S.audio==='keep'){if(D&&D.audio&&!S.bleeps.length)plan.pass=true;else if(D&&!D.hasAudio)plan.notice=T('noAudio');else if(S.dur>1200)plan.notice=T('tooLong');else if(S.file.size>734003200)plan.notice=T('tooBig');else{setProg(0,T('audioStep'));try{plan.A=await loadPCM();plan.acfg=typeof AudioEncoder!=='undefined'?await pickAudio(plan.A.sr,plan.A.ch):null;if(!plan.acfg){plan.A=null;plan.notice=T('noAudio')}}catch(e){plan.A=null;plan.notice=T('noAudio')}}}
     setProg(0,T('keepOpen'));const fast=!!D&&await videoReady(D);let blob=null;S.expMode=fast?'decode':'seek';
     if(fast){try{blob=await renderClip(cfg,W,H,D,plan,true)}catch(e){console.warn('fast export failed',e);S.expMode='seek';if(!expCancel){setProg(0,T('keepOpen'));blob=await renderClip(cfg,W,H,D,plan,false)}}}else blob=await renderClip(cfg,W,H,D,plan,false);
     if(expCancel||!blob){endExport(wl);sheetCheck();return}

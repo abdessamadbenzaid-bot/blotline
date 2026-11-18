@@ -11,7 +11,7 @@ android {
         applicationId = "ma.samed.blotline"
         minSdk = 29
         targetSdk = 36
-        versionCode = 1
+        versionCode = (System.getenv("BLOTLINE_VERSION_CODE") ?: "1").toInt()
         versionName = "1.0.0"
     }
 
@@ -20,6 +20,7 @@ android {
             val path = System.getenv("BLOTLINE_KEYSTORE")
             if (path != null) {
                 storeFile = file(path)
+                storeType = "PKCS12"
                 storePassword = System.getenv("BLOTLINE_KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("BLOTLINE_KEY_ALIAS")
                 keyPassword = System.getenv("BLOTLINE_KEY_PASSWORD")
