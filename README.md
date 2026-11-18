@@ -4,36 +4,21 @@
 - الإيميل ديال Privacy Policy محطوط: `abdessamadbenzaid@gmail.com`.
 - معرّف التطبيق هو `ma.samed.blotline`، وما كيتبدلش من بعد أول رفع.
 
-## 2. GitHub: البناء ورابط Privacy Policy
-1. دير repo **عمومي** فـ GitHub سميتو `blotline`، وطلع فيه محتوى هاد المجلد كامل، بما فيه `.github` و `docs`.
-2. فـ Settings > Pages اختار Branch `main` والمجلد `/docs`، ثم Save.
-3. رابط Privacy Policy غادي يكون: `https://abdessamadbenzaid-bot.github.io/blotline/privacy-policy.html`.
-4. صاوب مفتاح التوقيع مرة وحدة (Termux ولا PC):
-   `keytool -genkeypair -v -keystore upload.jks -alias blotline -keyalg RSA -keysize 2048 -validity 10000`
-5. حوّلو لنص: `base64 -w0 upload.jks`
-6. فـ Settings > Secrets and variables > Actions زيد:
-   `BLOTLINE_KEYSTORE_B64`, `BLOTLINE_KEYSTORE_PASSWORD`, `BLOTLINE_KEY_ALIAS` (blotline), `BLOTLINE_KEY_PASSWORD`
-7. Actions > Build signed AAB > Run workflow، ومن بعد حمّل `blotline-aab`.
+## 2. بناء ملف AAB الموقّع
+1. فـ GitHub: Settings > Secrets and variables > Actions > New repository secret.
+2. الاسم: `BLOTLINE_KEY_PASSWORD`. القيمة: مودباس قوي فيه 20 حرف أو أكثر، وحفظو عندك.
+3. Actions > Build signed AAB > Run workflow.
+4. ملي يكمل، حمّل `blotline-aab-vN` من أسفل صفحة التشغيل.
 
-حافظ على `upload.jks` والمودباس فبلاصة آمنة، وما تطلعهمش أبدا فـ repo.
+أول تشغيل كيصاوب مفتاح الرفع ويحفظو مشفّر فـ `android/keystore/`. ما تبدلش هاد المودباس من بعد.
 
 ## 3. أجوبة Play Console
-| القسم | الجواب |
-|---|---|
-| Category | Video Players & Editors |
-| Ads | No |
-| App access | All functionality available without special access |
-| Data safety: collect or share data? | No |
-| Advertising ID | No |
-| Target audience | 18+ |
-| Content rating | Utility / Productivity، بلا محتوى حساس |
-| Government / Financial / Health / News | No |
-| Privacy policy | رابط `privacy-policy.html` بعد رفعو (GitHub Pages مثلا) |
+كاينين كاملين فـ `play/STORE_LISTING.md`.
 
 ## 4. ملفات المتجر
-- `play/listing.json`: العنوان والوصف ب 4 لغات.
+- `play/STORE_LISTING.md`: النصوص ب 4 لغات.
 - `play/graphics/`: الأيقونة 512 و Feature graphic 1024×500.
-- `play/screenshots/`: لقطات EN و AR بقياس 1080×1920.
+- `play/screenshots/`: لقطات EN و FR و ES و AR بقياس 1080×1920.
 
 ## 5. الإطلاق
 1. Internal testing: جرّب على تليفون حقيقي (فتح، Track، تصدير، حفظ، مشاركة، واتساب).
